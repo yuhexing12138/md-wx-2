@@ -1,0 +1,104 @@
+@import './themes.css';
+
+@layer components {
+  /* Markdown Content Styles */
+  .markdown-body {
+    @apply text-base leading-7 text-justify break-words;
+    font-family: var(--font-body);
+    color: var(--text-color);
+  }
+
+  /* Headings */
+  .markdown-body h1 {
+    @apply text-2xl font-bold mt-6 mb-4 pb-2 border-b border-black/10;
+    font-family: var(--font-heading);
+    color: var(--heading-color);
+  }
+
+  .markdown-body h2 {
+    @apply text-xl font-bold mt-6 mb-3 pl-3 border-l-4;
+    font-family: var(--font-heading);
+    color: var(--heading-color);
+    border-color: var(--accent-color);
+  }
+
+  .markdown-body h3 {
+    @apply text-lg font-bold mt-5 mb-2;
+    font-family: var(--font-heading);
+    color: var(--heading-color);
+  }
+
+  /* Paragraphs */
+  .markdown-body p {
+    @apply mb-4 leading-relaxed;
+  }
+
+  /* Links */
+  .markdown-body a {
+    @apply no-underline border-b border-dashed transition-opacity hover:opacity-80;
+    color: var(--link-color);
+    border-color: var(--link-color);
+  }
+
+  /* Blockquotes */
+  .markdown-body blockquote {
+    @apply p-4 my-6 rounded-r;
+    background-color: var(--quote-bg);
+    border-left: 4px solid var(--quote-border);
+    color: var(--text-color);
+  }
+
+  /* Lists */
+  .markdown-body ul, 
+  .markdown-body ol {
+    @apply pl-6 mb-6;
+  }
+  
+  .markdown-body ul {
+    list-style-type: disc;
+  }
+  
+  .markdown-body ol {
+    list-style-type: decimal;
+  }
+
+  .markdown-body li {
+    @apply mb-1;
+    color: var(--list-bullet-color); /* 列表项颜色（影响序号） */
+  }
+  
+  .markdown-body li > span {
+    color: var(--text-color); /* 文本颜色恢复 */
+  }
+
+  /* Inline Code */
+  .markdown-body :not(pre) > code {
+    @apply px-1.5 py-0.5 rounded text-sm font-mono mx-0.5;
+    background-color: rgba(0, 0, 0, 0.06);
+    color: #d63384;
+  }
+
+  /* Images */
+  .markdown-body img {
+    @apply max-w-full h-auto rounded-lg shadow-md my-4 block mx-auto;
+  }
+  
+  /* Tables */
+  .markdown-body table {
+    @apply w-full border-collapse my-6 text-sm;
+  }
+  
+  .markdown-body th,
+  .markdown-body td {
+    @apply border border-gray-200 px-4 py-2;
+  }
+  
+  .markdown-body th {
+    @apply bg-gray-50 font-semibold text-left;
+  }
+
+  /* Horizontal Rule */
+  .markdown-body hr {
+    @apply my-8 border-0 h-px bg-gray-200;
+  }
+}

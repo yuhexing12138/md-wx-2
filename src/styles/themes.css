@@ -1,0 +1,83 @@
+:root {
+  /* 默认变量 (Fallback) */
+  --bg-color: #ffffff;
+  --text-color: #37352f;
+  --heading-color: #111111;
+  --accent-color: #333333;
+  --link-color: #37352f;
+  --quote-bg: transparent;
+  --quote-border: #333333;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-heading: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --list-bullet-color: #333333;
+}
+
+/* 1. 极致简约 (Minimalist) */
+.theme-minimalist {
+  --bg-color: #ffffff;
+  --text-color: #37352f;
+  --heading-color: #111111;
+  --accent-color: #333333;
+  --link-color: #37352f;
+  --quote-bg: transparent;
+  --quote-border: #333333;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-heading: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --list-bullet-color: #333333;
+}
+
+/* 2. 科技蓝调 (Tech Blue) */
+.theme-tech {
+  --bg-color: #f8fafc;
+  --text-color: #334155;
+  --heading-color: #1e3a8a; /* Blue 900 */
+  --accent-color: #3b82f6; /* Tailwind Blue 500 */
+  --link-color: #2563eb;
+  --quote-bg: #eff6ff;
+  --quote-border: #3b82f6;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-heading: 'Inter', system-ui, sans-serif;
+  --list-bullet-color: #3b82f6;
+}
+
+/* 3. 优雅宋风 (Elegant Serif) */
+.theme-serif {
+  --bg-color: #fdfbf7; /* 暖纸色 */
+  --text-color: #433422;
+  --heading-color: #2c2216;
+  --accent-color: #8c4b26;
+  --link-color: #8c4b26;
+  --quote-bg: #f4f1ea;
+  --quote-border: #8c4b26;
+  --font-body: "Songti SC", "Noto Serif SC", serif;
+  --font-heading: "Songti SC", "Noto Serif SC", serif;
+  --list-bullet-color: #8c4b26;
+}
+
+/* 4. 森系墨绿 (Forest Green) */
+.theme-forest {
+  --bg-color: #f2fcf5;
+  --text-color: #2e4a3d;
+  --heading-color: #134e38;
+  --accent-color: #2d8a5e;
+  --link-color: #2d8a5e;
+  --quote-bg: #e1f5ea;
+  --quote-border: #2d8a5e;
+  --font-body: 'Inter', sans-serif;
+  --font-heading: 'Inter', sans-serif;
+  --list-bullet-color: #2d8a5e;
+}
+
+/* 5. 活力热红 (Vibrant Red) */
+.theme-red {
+  --bg-color: #ffffff;
+  --text-color: #2d1b21;
+  --heading-color: #be123c; /* Rose 700 */
+  --accent-color: #e11d48; /* Rose 600 */
+  --link-color: #e11d48;
+  --quote-bg: #fff1f2;
+  --quote-border: #e11d48;
+  --font-body: 'Inter', sans-serif;
+  --font-heading: 'Inter', sans-serif;
+  --list-bullet-color: #e11d48;
+}

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信公众号 Markdown 渲染组件 UI 原型</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Marked.js (锁定版本以支持 highlight 选项) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+    <!-- Highlight.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+
+    <style>
+        /* ------------------- 核心样式与动画 ------------------- */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f3f4f6;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.1) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(34, 197, 94, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* 玻璃拟态 Toolbar */
+        .glass-toolbar {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ------------------- 主题定义 (CSS Variables) ------------------- */
+        
+        /* 1. 极致简约 (Minimalist) */
+        .theme-minimalist {
+            --bg-color: #ffffff;
+            --text-color: #37352f;
+            --heading-color: #111111;
+            --accent-color: #333333;
+            --link-color: #37352f;
+            --quote-bg: transparent;
+            --quote-border: #333333;
+            --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            --font-heading: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            --heading-decoration: none;
+            --list-bullet-color: #333333;
+        }
+
+        /* 2. 科技蓝调 (Tech Blue) */
+        .theme-tech {
+            --bg-color: #f8fafc;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+            --accent-color: #3b82f6; /* Tailwind Blue 500 */
+            --link-color: #2563eb;
+            --quote-bg: #eff6ff;
+            --quote-border: #3b82f6;
+            --font-body: 'Inter', system-ui, sans-serif;
+            --font-heading: 'Inter', system-ui, sans-serif;
+            --heading-decoration: left-border;
+            --list-bullet-color: #3b82f6;
+        }
+
+        /* 3. 优雅宋风 (Elegant Serif) */
+        .theme-serif {
+            --bg-color: #fdfbf7; /* 暖纸色 */
+            --text-color: #433422;
+            --heading-color: #2c2216;
+            --accent-color: #8c4b26;
+            --link-color: #8c4b26;
+            --quote-bg: #f4f1ea;
+            --quote-border: #8c4b26;
+            --font-body: "Songti SC", "Noto Serif SC", serif;
+            --font-heading: "Songti SC", "Noto Serif SC", serif;
+            --heading-decoration: bottom-border;
+            --list-bullet-color: #8c4b26;
+        }
+
+        /* 4. 森系墨绿 (Forest Green) */
+        .theme-forest {
+            --bg-color: #f2fcf5;
+            --text-color: #2e4a3d;
+            --heading-color: #134e38;
+            --accent-color: #2d8a5e;
+            --link-color: #2d8a5e;
+            --quote-bg: #e1f5ea;
+            --quote-border: #2d8a5e;
+            --font-body: 'Inter', sans-serif;
+            --font-heading: 'Inter', sans-serif;
+            --heading-decoration: left-border;
+            --list-bullet-color: #2d8a5e;
+        }
+
+        /* 5. 活力热红 (Vibrant Red) */
+        .theme-red {
+            --bg-color: #ffffff;
+            --text-color: #2d1b21;
+            --heading-color: #be123c; /* Rose 700 */
+            --accent-color: #e11d48; /* Rose 600 */
+            --link-color: #e11d48;
+            --quote-bg: #fff1f2;
+            --quote-border: #e11d48;
+            --font-body: 'Inter', sans-serif;
+            --font-heading: 'Inter', sans-serif;
+            --heading-decoration: left-border;
+            --list-bullet-color: #e11d48;
+        }
+
+        /* ------------------- 预览区样式实现 ------------------- */
+        #preview-content {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-body);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Typography */
+        #preview-content h1, 
+        #preview-content h2, 
+        #preview-content h3 {
+            color: var(--heading-color);
+            font-family: var(--font-heading);
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        #preview-content h1 { font-size: 1.6em; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 0.3em; }
+        #preview-content h2 { 
+            font-size: 1.4em; 
+            border-left: 4px solid var(--accent-color);
+            padding-left: 0.5em;
+        }
+        #preview-content h3 { font-size: 1.2em; }
+
+        /* 特殊主题装饰已统一到通用样式中 */
+
+        #preview-content p {
+            margin-bottom: 1.2em;
+            line-height: 1.75;
+            text-align: justify;
+        }
+
+        #preview-content a {
+            color: var(--link-color);
+            text-decoration: none;
+            border-bottom: 1px dashed var(--link-color);
+        }
+        #preview-content a:hover {
+            opacity: 0.8;
+        }
+
+        #preview-content blockquote {
+            background: var(--quote-bg);
+            border-left: 4px solid var(--quote-border);
+            padding: 1em;
+            margin: 1.5em 0;
+            color: var(--text-color);
+            border-radius: 4px;
+        }
+
+        #preview-content ul, #preview-content ol {
+            padding-left: 1.5em;
+            margin-bottom: 1.5em;
+        }
+        #preview-content li {
+            margin-bottom: 0.5em;
+            line-height: 1.7;
+        }
+        #preview-content li::marker {
+            color: var(--list-bullet-color);
+            font-weight: bold;
+        }
+
+        /* Mac 风格代码块 */
+        #preview-content pre {
+            background: #1e1e1e !important; /* 强制深色背景适配 github-dark */
+            color: #c9d1d9; /* 强制浅色文字，防止高亮失效时看不清 */
+            border-radius: 8px;
+            padding-top: 40px; /* Header height */
+            padding-bottom: 15px;
+            padding-left: 15px;
+            padding-right: 15px;
+            margin: 1.5em 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        /* Mac Window Controls */
+        #preview-content pre::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff5f56; /* Red */
+            box-shadow: 
+                20px 0 0 #ffbd2e, /* Yellow */
+                40px 0 0 #27c93f; /* Green */
+            z-index: 10;
+        }
+        
+        /* Optional Header Bar */
+        #preview-content pre::after {
+            content: 'terminal'; /* 可选：显示文件名或 terminal */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 38px;
+            background: rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.4);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: sans-serif;
+        }
+
+        #preview-content code {
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        /* Inline code */
+        #preview-content p code, 
+        #preview-content li code {
+            background: rgba(0,0,0,0.06);
+            color: #d63384;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.9em;
+            font-family: 'Fira Code', monospace;
+        }
+        .theme-dark p code, .theme-dark li code {
+            background: rgba(255,255,255,0.15);
+            color: #ff79c6;
+        }
+
+        /* ------------------- 视图模式切换 ------------------- */
+        .view-mobile {
+            width: 375px;
+            min-height: 812px;
+            border-radius: 40px;
+            border: 12px solid #1a1a1a;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .view-desktop {
+            width: 100%;
+            max-width: 800px;
+            min-height: 800px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.05);
+            padding: 40px;
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+
+        /* 手机模式下的刘海模拟 (仅装饰) */
+        .view-mobile::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 25px;
+            background: #1a1a1a;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            z-index: 50;
+            pointer-events: none;
+            display: none; /* 默认隐藏，JS 控制 */
+        }
+        .view-mobile.has-notch::after {
+            display: block;
+        }
+
+        /* Dropdown transition */
+        .dropdown-menu {
+            transform-origin: top;
+            transition: all 0.2s ease-out;
+            transform: scaleY(0);
+            opacity: 0;
+        }
+        .group:hover .dropdown-menu {
+            transform: scaleY(1);
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body class="flex flex-col items-center min-h-screen">
+
+    <!-- 顶部设置区域 (Toolbar) -->
+    <div class="fixed top-6 z-[100] glass-toolbar rounded-full px-2 py-2 flex items-center space-x-2 transition-all duration-300 hover:shadow-lg">
+        
+        <!-- 主题切换 Dropdown -->
+        <div class="relative group">
+            <button class="flex items-center space-x-2 bg-white/50 hover:bg-white/80 text-gray-700 px-4 py-2 rounded-full transition-colors cursor-pointer outline-none">
+                <span class="text-xl">🌈</span>
+                <span id="current-theme-label" class="font-medium text-sm">极致简约</span>
+                <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+            </button>
+            
+            <!-- Dropdown List -->
+            <div class="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden dropdown-menu flex flex-col">
+                <button onclick="setTheme('minimalist', '极致简约')" class="text-left px-4 py-3 hover:bg-gray-50 text-sm font-medium text-gray-700 flex items-center">
+                    <span class="w-4 h-4 rounded-full bg-gray-200 mr-2"></span> 极致简约
+                </button>
+                <button onclick="setTheme('tech', '科技蓝调')" class="text-left px-4 py-3 hover:bg-blue-50 text-sm font-medium text-blue-700 flex items-center">
+                    <span class="w-4 h-4 rounded-full bg-blue-500 mr-2"></span> 科技蓝调
+                </button>
+                <button onclick="setTheme('serif', '优雅宋风')" class="text-left px-4 py-3 hover:bg-orange-50 text-sm font-medium text-orange-800 flex items-center">
+                    <span class="w-4 h-4 rounded-full bg-orange-200 mr-2"></span> 优雅宋风
+                </button>
+                <button onclick="setTheme('forest', '森系墨绿')" class="text-left px-4 py-3 hover:bg-green-50 text-sm font-medium text-green-800 flex items-center">
+                    <span class="w-4 h-4 rounded-full bg-green-600 mr-2"></span> 森系墨绿
+                </button>
+                <button onclick="setTheme('red', '活力热红')" class="text-left px-4 py-3 hover:bg-red-50 text-sm font-medium text-red-600 flex items-center">
+                    <span class="w-4 h-4 rounded-full bg-red-500 mr-2"></span> 活力热红
+                </button>
+            </div>
+        </div>
+
+        <div class="w-px h-6 bg-gray-300 mx-2"></div>
+
+        <!-- 视图切换 -->
+        <button onclick="toggleView()" id="view-btn" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/50 hover:bg-blue-100 text-gray-600 hover:text-blue-600 transition-colors" title="切换视图">
+            <i class="fas fa-mobile-alt text-lg"></i>
+        </button>
+
+        <!-- 复制按钮 -->
+        <button onclick="copyToClipboard()" class="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 hover:bg-green-600 text-white shadow-md hover:shadow-lg transition-all transform hover:scale-105" title="复制到公众号">
+            <i class="fas fa-clipboard"></i>
+        </button>
+
+    </div>
+
+    <!-- 预览区域容器 -->
+    <div class="mt-28 w-full flex justify-center px-4 pb-20 overflow-x-hidden">
+        
+        <!-- 设备外壳 -->
+        <div id="device-frame" class="view-mobile theme-classic relative shadow-2xl transition-all duration-500 bg-white">
+            
+            <!-- 内容区域 -->
+            <div id="preview-content" class="h-full w-full overflow-y-auto no-scrollbar">
+                <!-- Content will be injected by JS -->
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center">
+        <i class="fas fa-check-circle text-green-400 mr-2"></i>
+        <span>已复制，可直接粘贴到公众号后台！</span>
+    </div>
+
+    <script>
+        /* 1. 初始化 Markdown 内容 */
+        const initialMarkdown = `
+# 微信公众号排版组件
+
+你好！这是一个专为 **微信公众号** 设计的 Markdown 渲染组件预览。
+
+> 所有的伟大，都源于一个勇敢的开始。
+> All greatness comes from a brave beginning.
+
+## 1. 核心功能
+
+我们致力于提供最优雅的写作体验：
+
+- **多主题支持**：内置 5 款精选主题
+- **代码高亮**：Mac 风格窗口 + GitHub Dark 配色
+- **一键复制**：完美兼容公众号后台
+- **响应式预览**：手机/桌面双视图切换
+
+## 2. 代码演示
+
+下面是一段 React 代码，展示了组件的调用方式：
+
+\`\`\`tsx
+import { MdWxRenderer } from 'md-wx-renderer';
+
+const App = () => {
+  return (
+    <MdWxRenderer 
+      content="# Hello World" 
+      theme="tech-blue"
+      enableToolbar={true}
+    />
+  );
+};
+export default App;
+\`\`\`
+
+## 3. 样式展示
+
+### 3.1 有序列表
+1. 第一步：撰写 Markdown
+2. 第二步：选择心仪的主题
+3. 第三步：点击复制按钮
+
+### 3.2 链接风格
+访问 [GitHub 仓库](https://github.com) 了解更多详情。
+
+### 3.3 强调文本
+支持 *斜体*、**加粗** 以及 \`内联代码\` 的样式优化。
+
+---
+
+*Made with ❤️ by Trae AI*
+        `;
+
+        // 2. 渲染逻辑
+        const previewContent = document.getElementById('preview-content');
+        
+        function renderMarkdown() {
+            // 配置 marked
+            marked.setOptions({
+                highlight: function(code, lang) {
+                    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                    return hljs.highlight(code, { language }).value;
+                },
+                langPrefix: 'hljs language-'
+            });
+
+            // 渲染 HTML
+            previewContent.innerHTML = marked.parse(initialMarkdown);
+        }
+
+        // 3. 主题切换
+        const deviceFrame = document.getElementById('device-frame');
+        const themeLabel = document.getElementById('current-theme-label');
+
+        function setTheme(themeClass, themeName) {
+            // 移除所有 theme- 开头的 class
+            deviceFrame.classList.forEach(cls => {
+                if (cls.startsWith('theme-')) {
+                    deviceFrame.classList.remove(cls);
+                }
+            });
+            // 添加新 theme
+            deviceFrame.classList.add(`theme-${themeClass}`);
+            // 更新 label
+            themeLabel.textContent = themeName;
+        }
+
+        // 4. 视图切换
+        let isMobile = true;
+        const viewBtn = document.getElementById('view-btn');
+
+        function toggleView() {
+            isMobile = !isMobile;
+            
+            if (isMobile) {
+                deviceFrame.classList.remove('view-desktop');
+                deviceFrame.classList.add('view-mobile');
+                deviceFrame.classList.add('has-notch'); // 只有手机模式可能有刘海
+                viewBtn.innerHTML = '<i class="fas fa-mobile-alt text-lg"></i>';
+            } else {
+                deviceFrame.classList.remove('view-mobile');
+                deviceFrame.classList.remove('has-notch');
+                deviceFrame.classList.add('view-desktop');
+                viewBtn.innerHTML = '<i class="fas fa-desktop text-lg"></i>';
+            }
+        }
+
+        // 5. 复制模拟
+        function copyToClipboard() {
+            const toast = document.getElementById('toast');
+            
+            // 模拟复制动作
+            // 实际项目中会调用 Clipboard API 和 Juice 进行内联处理
+            
+            // Show Toast
+            toast.classList.remove('opacity-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 2000);
+        }
+
+        // 初始化
+        window.onload = () => {
+            renderMarkdown();
+            // 默认手机视图
+            deviceFrame.classList.add('has-notch');
+            // 设置默认主题
+            setTheme('minimalist', '极致简约');
+        };
+
+    </script>
+</body>
+</html>
