@@ -1,142 +1,121 @@
-import React, { useState, useRef } from 'react';
-import MarkdownRenderer from '@/components/Renderer/MarkdownRenderer';
-import PreviewContainer from '@/components/Preview/PreviewContainer';
-import Toolbar from '@/components/Toolbar/Toolbar';
-import Toast from '@/components/Toast/Toast';
-import { useTheme } from '@/hooks/useTheme';
-import { processHtmlStyles } from '@/utils/style-processor';
+import React, { useState } from 'react';
+import MdWxRenderer from './components/MdWxRenderer';
+import { THEMES } from './constants/themes';
 
-const exampleMarkdown = `
-# 微信公众号排版组件
+const DEFAULT_MARKDOWN = `# Hello WeChat
 
-你好！这是一个专为 **微信公众号** 设计的 Markdown 渲染组件预览。
+这是一段 **Markdown** 文本，专为微信公众号设计。
 
-> 所有的伟大，都源于一个勇敢的开始。
-> All greatness comes from a brave beginning.
+## ✨ 特性
 
-## 1. 代码高亮测试
+- 📝 **标准 Markdown 支持**
+- 🎨 **多主题切换**
+- 📱 **响应式预览**
+- 📋 **一键复制**
 
-这是一段 JavaScript 代码：
+## 代码示例
 
 \`\`\`javascript
-function greet(name) {
-  const message = \`Hello, \${name}!\`;
-  console.log(message);
-  return message;
-}
-
-// 调用函数
-greet('WeChat');
-\`\`\`
-
-这是一段 CSS 代码：
-
-\`\`\`css
-.container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #f0f0f0;
+function greet() {
+  console.log("Hello, WeChat!");
 }
 \`\`\`
 
-## 2. 样式展示
-
-### 2.1 有序列表
-1. 第一步：撰写 Markdown
-2. 第二步：选择心仪的主题
-3. 第三步：点击复制按钮
-
-### 2.2 链接风格
-访问 [GitHub 仓库](https://github.com) 了解更多详情。
-
-### 2.3 表格支持
-
-| 功能 | 状态 | 优先级 |
-| :--- | :---: | :---: |
-| 基础渲染 | ✅ | 高 |
-| 主题切换 | ✅ | 高 |
-| 代码高亮 | 🚧 | 中 |
-
----
-
-*Made with ❤️ by Trae AI*
+> 试试在左侧修改内容，右侧实时预览！
 `;
 
 function App() {
-  const { currentTheme } = useTheme();
-  const [isMobile, setIsMobile] = useState(true);
-  const [toast, setToast] = useState(null);
-  const previewRef = useRef(null);
-
-  const handleCopy = async () => {
-    if (!previewRef.current) return;
-
-    try {
-      // 1. 获取 Markdown 渲染后的 HTML 元素
-      // 查找 .markdown-body 元素，它是 MarkdownRenderer 的根节点
-      const markdownBody = previewRef.current.querySelector('.markdown-body');
-      
-      if (!markdownBody) {
-        throw new Error('未找到渲染内容');
-      }
-
-      // 2. 获取原始 HTML
-      const rawHtml = markdownBody.innerHTML;
-
-      // 3. 处理内联样式
-      const processedHtml = processHtmlStyles(rawHtml, currentTheme);
-
-      // 4. 构建 ClipboardItem
-      // 微信公众号支持 text/html 格式的剪贴板数据
-      const blob = new Blob([processedHtml], { type: 'text/html' });
-      const textBlob = new Blob([markdownBody.innerText], { type: 'text/plain' });
-      const item = new ClipboardItem({
-        'text/html': blob,
-        'text/plain': textBlob,
-      });
-
-      // 5. 写入剪贴板
-      await navigator.clipboard.write([item]);
-
-      setToast({ type: 'success', message: '已复制到剪贴板，可直接粘贴到微信后台' });
-    } catch (error) {
-      console.error('Copy failed:', error);
-      setToast({ type: 'error', message: '复制失败，请重试' });
-    }
-  };
+  const [content, setContent] = useState(DEFAULT_MARKDOWN);
+  const [theme, setTheme] = useState('theme-minimalist');
+  const [enableToolbar, setEnableToolbar] = useState(true);
+  const [enablePreviewWrapper, setEnablePreviewWrapper] = useState(true);
 
   return (
-    <div className="min-h-screen p-8 flex flex-col items-center gap-8 bg-gray-50">
-      {/* Toast */}
-      {toast && (
-        <Toast 
-          message={toast.message} 
-          type={toast.type} 
-          onClose={() => setToast(null)} 
-        />
-      )}
+    <div className="flex flex-col md:flex-row h-screen bg-gray-100 overflow-hidden font-sans">
+      {/* Settings & Editor Panel */}
+      <div className="w-full md:w-1/2 bg-white border-r border-gray-200 flex flex-col shadow-lg z-10">
+        <div className="p-4 border-b border-gray-100">
+          <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <span>📝</span> md-wx Playground
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">本地组件预览与调试</p>
+        </div>
 
-      {/* Toolbar */}
-      <Toolbar 
-        isMobile={isMobile}
-        onToggleMobile={() => setIsMobile(!isMobile)}
-        onCopy={handleCopy}
-      />
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          
+          {/* Settings Section */}
+          <div className="space-y-4">
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">设置面板</h2>
+            
+            {/* Theme Selector */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">选择主题</label>
+              <select 
+                value={theme} 
+                onChange={(e) => setTheme(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              >
+                {THEMES.map(t => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
 
-      {/* Preview Area */}
-      <main className="mt-24 w-full flex justify-center px-4 pb-20">
-        <PreviewContainer isMobile={isMobile} currentTheme={currentTheme}>
-          {/* 将 ref 绑定到包含 MarkdownRenderer 的父级 div */}
-          <div ref={previewRef}>
-            <MarkdownRenderer content={exampleMarkdown} />
+            {/* Toggles */}
+            <div className="space-y-3">
+              <label className="flex items-center justify-between cursor-pointer group">
+                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">启用工具栏 (Toolbar)</span>
+                <input 
+                  type="checkbox" 
+                  checked={enableToolbar}
+                  onChange={(e) => setEnableToolbar(e.target.checked)}
+                  className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
+                />
+              </label>
+
+              <label className="flex items-center justify-between cursor-pointer group">
+                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">启用设备外壳 (Preview Wrapper)</span>
+                <input 
+                  type="checkbox" 
+                  checked={enablePreviewWrapper}
+                  onChange={(e) => setEnablePreviewWrapper(e.target.checked)}
+                  className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
+                />
+              </label>
+            </div>
           </div>
-        </PreviewContainer>
-      </main>
 
-      <footer className="fixed bottom-4 text-gray-400 text-xs">
-        <p>Markdown-to-WeChat-Renderer &copy; 2026</p>
-      </footer>
+          <hr className="border-gray-100" />
+
+          {/* Editor Section */}
+          <div className="space-y-2 flex-1 flex flex-col">
+             <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Markdown 内容</h2>
+             <textarea
+               value={content}
+               onChange={(e) => setContent(e.target.value)}
+               className="w-full h-64 md:h-96 p-3 text-sm font-mono border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none bg-gray-50"
+               placeholder="输入 Markdown..."
+             />
+          </div>
+
+        </div>
+        
+        <div className="p-4 border-t border-gray-100 bg-gray-50 text-xs text-gray-400 text-center">
+          md-wx-renderer &copy; 2026
+        </div>
+      </div>
+
+      {/* Preview Panel */}
+      <div className="flex-1 bg-gray-200 relative overflow-hidden">
+        <MdWxRenderer 
+          content={content} 
+          theme={theme}
+          onThemeChange={setTheme}
+          enableToolbar={enableToolbar}
+          enablePreviewWrapper={enablePreviewWrapper}
+          className="h-full w-full"
+        />
+      </div>
     </div>
   );
 }

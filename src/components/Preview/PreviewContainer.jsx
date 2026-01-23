@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
@@ -8,14 +8,14 @@ import classNames from 'classnames';
  * 预览容器组件，支持手机和桌面两种视图模式。
  * 包含设备外壳模拟（手机刘海、边框等）。
  */
-const PreviewContainer = ({ children, isMobile, currentTheme }) => {
+const PreviewContainer = forwardRef(({ children, isMobile, currentTheme }, ref) => {
   const containerClasses = classNames(
     'relative transition-all duration-500 bg-white overflow-hidden',
     // Theme class
     currentTheme,
     // Mobile View Styles
     isMobile && [
-      'w-[375px] min-h-[812px]',
+      'w-[375px] h-[812px]',
       'rounded-[40px]',
       'border-[12px] border-[#1a1a1a]',
       'shadow-2xl',
@@ -23,7 +23,7 @@ const PreviewContainer = ({ children, isMobile, currentTheme }) => {
     ],
     // Desktop View Styles
     !isMobile && [
-      'w-full max-w-[800px] min-h-[800px]',
+      'w-full max-w-[800px] h-[800px]',
       'rounded-lg',
       'border border-black/5',
       'shadow-xl',
@@ -43,8 +43,9 @@ const PreviewContainer = ({ children, isMobile, currentTheme }) => {
 
       {/* Content Area */}
       <div 
+        ref={ref}
         className={classNames(
-          'h-full w-full overflow-y-auto no-scrollbar',
+          'h-full w-full overflow-y-auto',
           'transition-all duration-300',
           isMobile ? 'p-5 pt-12 pb-10' : 'p-10'
         )}
@@ -57,7 +58,9 @@ const PreviewContainer = ({ children, isMobile, currentTheme }) => {
       </div>
     </div>
   );
-};
+});
+
+PreviewContainer.displayName = 'PreviewContainer';
 
 PreviewContainer.propTypes = {
   children: PropTypes.node.isRequired,

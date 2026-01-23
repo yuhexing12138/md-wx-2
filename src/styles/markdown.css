@@ -1,8 +1,5 @@
-@import './themes.css';
-
-@layer components {
-  /* Markdown Content Styles */
-  .markdown-body {
+/* Markdown Content Styles */
+.markdown-body {
     @apply text-base leading-7 text-justify break-words;
     font-family: var(--font-body);
     color: var(--text-color);
@@ -97,8 +94,18 @@
     @apply bg-gray-50 font-semibold text-left;
   }
 
+  /* Code Blocks */
+  .markdown-body pre {
+    @apply p-4 my-6 rounded-lg overflow-x-auto;
+    background-color: rgba(0, 0, 0, 0.06);
+  }
+
+  .markdown-body pre code {
+    @apply p-0 bg-transparent text-sm font-mono;
+    color: inherit;
+  }
+
   /* Horizontal Rule */
   .markdown-body hr {
     @apply my-8 border-0 h-px bg-gray-200;
   }
-}

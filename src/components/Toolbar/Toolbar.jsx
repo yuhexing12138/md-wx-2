@@ -29,7 +29,7 @@ const Toolbar = ({ isMobile, onToggleMobile, onCopy }) => {
   }, []);
 
   return (
-    <div className="glass-toolbar fixed top-6 left-1/2 -translate-x-1/2 z-[100] px-2 py-2 rounded-full flex items-center gap-2 transition-all duration-300">
+    <div className="glass-toolbar fixed top-6 right-6 z-[100] px-2 py-2 rounded-full flex items-center gap-2 transition-all duration-300">
       
       {/* 1. 主题选择器 (Dropdown Style) */}
       <div className="relative" ref={themeDropdownRef}>
@@ -115,6 +115,8 @@ const Toolbar = ({ isMobile, onToggleMobile, onCopy }) => {
 };
 
 Toolbar.propTypes = {
+  currentTheme: PropTypes.string.isRequired,
+  onThemeChange: PropTypes.func.isRequired,
   isMobile: PropTypes.bool.isRequired,
   onToggleMobile: PropTypes.func.isRequired,
   onCopy: PropTypes.func,
