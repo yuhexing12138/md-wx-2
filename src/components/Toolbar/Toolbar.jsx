@@ -10,10 +10,21 @@ import { THEMES } from '@/constants/themes';
  * 顶部悬浮工具栏，提供主题切换、视图切换和复制功能。
  * 采用玻璃拟态设计 (Glassmorphism)。
  */
-const Toolbar = ({ isMobile, onToggleMobile, onCopy }) => {
-  const { currentTheme, setTheme } = useTheme();
+const Toolbar = ({ isMobile, onToggleMobile, onCopy, currentTheme: propCurrentTheme, onThemeChange }) => {
+  const { currentTheme: contextCurrentTheme, setTheme: contextSetTheme } = useTheme();
   const [isThemeOpen, setIsThemeOpen] = useState(false);
   const themeDropdownRef = useRef(null);
+
+  // 优先使用 props 传入的主题状态，如果未传入则使用 context
+  const currentTheme = propCurrentTheme || contextCurrentTheme;
+  const handleThemeSelect = (themeId) => {
+    if (onThemeChange) {
+      onThemeChange(themeId);
+    } else {
+      contextSetTheme(themeId);
+    }
+    setIsThemeOpen(false);
+  };
 
   const currentThemeObj = THEMES.find(t => t.id === currentTheme) || THEMES[0];
 
@@ -54,8 +65,7 @@ const Toolbar = ({ isMobile, onToggleMobile, onCopy }) => {
               <button
                 key={theme.id}
                 onClick={() => {
-                  setTheme(theme.id);
-                  setIsThemeOpen(false);
+                  handleThemeSelect(theme.id);
                 }}
                 className={classNames(
                   'w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors text-left',
