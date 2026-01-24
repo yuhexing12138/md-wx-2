@@ -59,82 +59,15 @@ export default App;
 
 ## 📖 API 文档
 
-### `<MdWxRenderer />`
+关于组件的详细属性 (Props)、内置主题列表以及 `useMdWx` Hook 的高级用法，请参阅：
 
-主渲染组件，集成了工具栏、预览框和渲染逻辑。
-
-| 属性 | 类型 | 默认值 | 说明 |
-| :--- | :--- | :--- | :--- |
-| `content` | `string` | **Required** | Markdown 文本内容 |
-| `theme` | `string` | `'theme-minimalist'` | 当前主题 ID（受控模式），可选值参考下文 |
-| `onThemeChange` | `(theme: string) => void` | - | 主题切换回调函数 |
-| `enableToolbar` | `boolean` | `true` | 是否显示顶部悬浮工具栏 |
-| `enablePreviewWrapper` | `boolean` | `true` | 是否显示手机/PC 设备外壳预览 |
-| `onCopy` | `() => void` | - | 复制成功后的回调函数 |
-| `className` | `string` | - | 自定义容器类名 |
-| `style` | `object` | - | 自定义容器样式 |
-
-### 内置主题列表
-
-| 主题 ID | 名称 |
-| :--- | :--- |
-| `theme-minimalist` | 极致简约 (默认) |
-| `theme-tech` | 科技蓝调 |
-| `theme-serif` | 优雅宋风 |
-| `theme-forest` | 森系墨绿 |
-| `theme-red` | 活力热红 |
-
----
-
-### `useMdWx` Hook
-
-如果你想构建自定义的 UI，可以使用此 Hook 来实现核心的复制功能。
-
-```javascript
-import { useMdWx } from 'md-wx-renderer';
-import { useRef } from 'react';
-
-function CustomEditor({ content, theme }) {
-  const contentRef = useRef(null);
-  
-  // 传入包含 .markdown-body 的容器 ref
-  const { copyToWeChat } = useMdWx({ contentRef, theme });
-
-  return (
-    <div>
-      <button onClick={copyToWeChat}>复制到公众号</button>
-      <div ref={contentRef}>
-        {/* 你的渲染逻辑，需包含 .markdown-body 类名以便样式生效 */}
-        <div className="markdown-body">
-           {/* ... */}
-        </div>
-      </div>
-    </div>
-  );
-}
-```
+👉 **[API 文档 (docs/api.md)](docs/api.md)**
 
 ## 🛠 开发与贡献
 
-1.  **克隆项目**
-    ```bash
-    git clone https://github.com/your-repo/md-wx-renderer.git
-    ```
+如果你想参与本项目的开发，或者需要在本地调试修改后的代码，请参阅开发指南。我们提供了详细的 `npm link` 本地调试流程说明。
 
-2.  **安装依赖**
-    ```bash
-    npm install
-    ```
-
-3.  **启动开发服务器**
-    ```bash
-    npm run dev
-    ```
-
-4.  **构建库**
-    ```bash
-    npm run build
-    ```
+👉 **[开发指南 (docs/development.md)](docs/development.md)**
 
 ## 📄 License
 
